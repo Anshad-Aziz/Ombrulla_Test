@@ -1,46 +1,31 @@
-from langchain_groq import ChatGroq
-from langchain.prompts import PromptTemplate
-from dotenv import load_dotenv
-import os
+# yolo_detector.py
+from ultralytics import YOLO
+import cv2
+import numpy as np
+from PIL import Image
 
-load_dotenv()
+class YOLODetector:
+    def __init__(self, model_path="yolo11n.pt"):
+        """Initialize YOLO model."""
+        self.model = YOLO(model_path)
 
-class LLMProcessor:
-    def __init__(self, model_name="llama3-8b-8192"):
-        """Initialize Groq LLM via LangChain."""
+    def detect_objects(self, image):
+        """Detect objects in the provided image and return results."""
         try:
-            self.llm = ChatGroq(
-                model_name=model_name,
-                api_key=os.getenv("GROQ_API_KEY")
-            )
+            # Convert PIL Image to numpy array
+            img_array = np.array(image)
+            # Convert RGB to BGR for OpenCV
+            img_array = cv2.cvtColor(img_array, cv2.COLOR_RGB2BGR)
+            # Perform detection
+            results = self.model(img_array)
+            # Extract detected objects and confidence scores
+            detections = []
+            for result in results:
+                for box in result.boxes:
+                    class_id = int(box.cls)
+                    confidence = float(box.conf)
+                    label = result.names[class_id]
+                    detections.append({"label": label, "confidence": confidence})
+            return detections
         except Exception as e:
-            raise Exception(f"Failed to initialize LLM: {str(e)}")
-
-    def generate_response(self, detections, user_prompt):
-        """Generate a coherent response combining detections and user prompt."""
-        try:
-            # Format detections into a string
-            if isinstance(detections, dict) and "error" in detections:
-                detection_text = detections["error"]
-            else:
-                detection_text = ", ".join(
-                    [f"{d['label']} (confidence: {d['confidence']:.2f})" for d in detections]
-                ) if detections else "No objects detected."
-
-            # Create prompt template
-            prompt_template = PromptTemplate(
-                template="Based on the following detected objects in an image: {detections}\n"
-                         "And the user prompt: {user_prompt}\n"
-                         "Generate a coherent and meaningful response.",
-                input_variables=["detections", "user_prompt"]
-            )
-
-            # Generate response
-            chain = prompt_template | self.llm
-            response = chain.invoke({
-                "detections": detection_text,
-                "user_prompt": user_prompt
-            })
-            return response.content
-        except Exception as e:
-            return f"Text generation failed: {str(e)}"
+            return {"error": f"Object detection failed: {str(e)}"}

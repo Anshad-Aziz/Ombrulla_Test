@@ -64,7 +64,7 @@ def main():
 
                 # Generate text response
                 with st.spinner("Generating text response..."):
-                    response = llm_processor.generate_response(detections, user_prompt)
+                    response = llm_processor.generate_description(user_prompt, detections)
                 st.subheader("Generated Text Response:")
                 st.write(response)
 

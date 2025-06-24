@@ -19,3 +19,5 @@ A Python application that integrates YOLO for object detection, LangChain with G
    ```bash
    git clone <repository_url>
    cd image_text_app
+   pip install -r requirements.txt
+   python streamlit app.py

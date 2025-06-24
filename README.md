@@ -7,6 +7,13 @@ A Python application that integrates YOLO for object detection, LangChain with G
 - Visual Studio Code (recommended)
 - Groq API key (sign up at [groq.com](https://groq.com))
 
+## 🔧 Technologies Used
+- **YOLOv11n** (Ultralytics) for object detection
+- **LangChain + Groq LLaMA3** for text generation
+- **Streamlit** for web interface
+
+
+
 ## Setup Instructions
 1. **Clone the Repository** (or create the project structure manually):
    ```bash
